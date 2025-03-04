@@ -14,10 +14,6 @@
 {% for access_control in unbound_access_control %}
     access-control: {{access_control}}
 {% endfor %}
-
-    hide-identity: yes
-    hide-version: yes
-
 {% for private_address in unbound_private_address %}
     private-address: {{private_address}}
 {% endfor %}

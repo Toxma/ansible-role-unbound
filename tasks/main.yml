@@ -15,7 +15,7 @@
 
 - name: Ensure zones folder exist
   ansible.builtin.file:
-    path: /etc/unbound/conf.d
+    path: /etc/unbound/unbound.conf.d
     state: directory
     mode: 755
   notify: restart unbound
@@ -35,7 +35,7 @@
 - name: configure add independant config file
   ansible.builtin.template:
      src: "{{item}}.j2"
-     dest: "/etc/unbound/conf.d/{{item}}"
+     dest: "/etc/unbound/unbound.conf.d/{{item}}"
   with_items:
      - 01general.conf
      - 98stub_zone.conf
@@ -47,7 +47,7 @@
 - name: configure unbound zones
   ansible.builtin.template:
      src: "10zone.conf.j2"
-     dest: "/etc/unbound/conf.d/10{{item.name}}.conf"
+     dest: "/etc/unbound/unbound.conf.d/10{{item.name}}.conf"
   with_items: "{{unbound_zones}}"
   notify: restart unbound
   tags: ["configuration","unbound"]
