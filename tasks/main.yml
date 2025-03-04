@@ -1,21 +1,28 @@
 ---
 - name: install unbound for Debian OS family
-  apt: pkg=unbound state={{ unbound_pkg_state }}
+  ansible.builtin.apt:
+    pkg: unbound
+    state: "{{ unbound_pkg_state }}"
   when: ansible_os_family == 'Debian' and unbound_only_zones == false
   tags: ["packages","unbound"]
 
 - name: install unbound for RedHat OS family
-  yum: name=unbound state={{ unbound_pkg_state }}
+  ansible.builtin.yum:
+    name: unbound
+    state: "{{ unbound_pkg_state }}"
   when: (ansible_os_family == 'RedHat' or ansible_os_family == 'Rocky')and unbound_only_zones == false
   tags: ["packages","unbound"]
 
 - name: Ensure zones folder exist
-  file: path=/etc/unbound/conf.d state=directory mode=755
+  ansible.builtin.file:
+    path: /etc/unbound/conf.d
+    state: directory
+    mode: 755
   notify: restart unbound
   tags: ["configuration","unbound"]
 
 - name: Ensure log file exist
-  file:
+  ansible.builtin.file:
     path: "{{ unbound_logfile }}"
     state: touch
     mode: 0644
@@ -26,9 +33,9 @@
   tags: ["configuration","unbound"]
 
 - name: configure add independant config file
-  template:
-     src={{item}}.j2
-     dest="/etc/unbound/conf.d/{{item}}"
+  ansible.builtin.template:
+     src: "{{item}}.j2"
+     dest: "/etc/unbound/conf.d/{{item}}"
   with_items:
      - 01general.conf
      - 98stub_zone.conf
@@ -38,21 +45,21 @@
   tags: ["configuration","unbound"]
 
 - name: configure unbound zones
-  template:
-     src=10zone.conf.j2
-     dest="/etc/unbound/conf.d/10{{item.name}}.conf"
+  ansible.builtin.template:
+     src: "10zone.conf.j2"
+     dest: "/etc/unbound/conf.d/10{{item.name}}.conf"
   with_items: "{{unbound_zones}}"
   notify: restart unbound
   tags: ["configuration","unbound"]
 
 - name: retreive unbound conf file list
-  shell: /bin/ls /etc/unbound/conf.d/
+  ansible.builtin.shell: /bin/ls /etc/unbound/unbound.conf.d/
   register: unbound_conf_list
   check_mode: no
   tags: ["configuration","unbound"]
 
 - name: configure unbound.conf to include all configuration
-  template:
+  ansible.builtin.template:
      src=unbound.conf.j2
      dest=/etc/unbound/unbound.conf
      validate="/usr/sbin/unbound-checkconf %s"
@@ -60,10 +67,9 @@
   tags: ["configuration","unbound"]
 
 - name: ensure unbound is started/stopped
-  service:
+  ansible.builtin.service:
      name=unbound
      state={{ unbound_service_state }}
      enabled={{ unbound_service_enabled }}
      pattern="unbound"
   tags: ["service","unbound"]
-
