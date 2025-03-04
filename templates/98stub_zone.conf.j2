@@ -7,8 +7,8 @@
         {% for stub_addr in stub_zone.addr -%}
             stub-addr: {{ stub_addr }}
         {% endfor %}
-        {% if stub_zone.stub_prime is defined -%}
-            stub-prime: {{ stub_zone.stub_prime | lower }}
+        {%- if stub_zone.stub_prime is defined -%}
+        stub-prime: {{ stub_zone.stub_prime }}
         {% endif %}
 {% endfor %}
 {% endif %}
