@@ -4,10 +4,6 @@
 # See /usr/share/doc/unbound/examples/unbound.conf for a commented
 # reference config file.
 
-server:
-    # The following line will configure unbound to perform cryptographic
-    # DNSSEC validation using the root trust anchor.
-
 {% for include in unbound_conf_list.stdout_lines %}
-    include: "/etc/unbound/unbound.conf.d/{{include}}"
+include-toplevel: "/etc/unbound/unbound.conf.d/{{include}}"
 {% endfor %}
