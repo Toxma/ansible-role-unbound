@@ -60,16 +60,29 @@
 
 - name: configure unbound.conf to include all configuration
   ansible.builtin.template:
-     src=unbound.conf.j2
-     dest=/etc/unbound/unbound.conf
-     validate="/usr/sbin/unbound-checkconf %s"
+     src: unbound.conf.j2
+     dest: /etc/unbound/unbound.conf
   notify: restart unbound
   tags: ["configuration","unbound"]
 
+- name: Run unbound-checkconf command
+  ansible.builtin.shell: "/usr/sbin/unbound-checkconf"
+  register: checkconf_output
+  failed_when: "'errors in configuration file' in checkconf_output.stderr"
+  
+- name: Display command stdout if check succeed
+  ansible.builtin.debug:
+    msg: "Output: {{ checkconf_output.stdout }}"
+  when: checkconf_output.rc == 0
+
+- name: Display error message if check failed
+  ansible.builtin.debug:
+    msg: "Error: {{ checkconf_output.stderr }}"
+  when: checkconf_output.rc != 0
+
 - name: ensure unbound is started/stopped
   ansible.builtin.service:
-     name=unbound
-     state={{ unbound_service_state }}
-     enabled={{ unbound_service_enabled }}
-     pattern="unbound"
+     name: unbound
+     state: "{{ unbound_service_state }}"
+     enabled: "{{ unbound_service_enabled }}"
   tags: ["service","unbound"]
